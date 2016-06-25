@@ -1,7 +1,6 @@
 # Rust
 
 [![Build Status](https://travis-ci.org/iamed2/Rust.jl.svg?branch=master)](https://travis-ci.org/iamed2/Rust.jl)
-
 [![codecov.io](http://codecov.io/github/iamed2/Rust.jl/coverage.svg?branch=master)](http://codecov.io/github/iamed2/Rust.jl?branch=master)
 
 
