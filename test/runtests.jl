@@ -15,5 +15,29 @@ using Base.Libdl
     """)
 
     addition = dlsym(rustlib, :addition)
+    @test addition != C_NULL
     @test UInt32(UInt32(2) + UInt32(10)) === ccall(addition, UInt32, (UInt32, UInt32), 2, 10)
+end
+
+@testset "Compile Julia function" begin
+    @testset "Emission" begin
+        function addition(a::UInt32, b::UInt32)
+            a + b
+        end
+
+        name, emission = Rust.AST.generate_rust(addition, (UInt32, UInt32))
+        @test isa(emission, String)
+        @test name == "addition"
+    end
+
+    @testset "Compilation" begin
+        function addition(a::UInt32, b::UInt32)
+            a + b
+        end
+
+        addition = compile_function(addition, (UInt32, UInt32))
+
+        @test addition != C_NULL
+        @test UInt32(UInt32(2) + UInt32(10)) === ccall(addition, UInt32, (UInt32, UInt32), 2, 10)
+    end
 end

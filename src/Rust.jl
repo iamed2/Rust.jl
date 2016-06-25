@@ -1,10 +1,13 @@
 module Rust
 
-export compile_code
+export compile_code, compile_function
 
-import Base.Libdl: dlext, dlopen
+import Base.Libdl: dlext, dlopen, dlsym
 
 include(joinpath(dirname(@__FILE__), "..", "deps", "deps.jl"))
+include(joinpath(dirname(@__FILE__), "AST.jl"))
+
+import .AST
 
 global file_counter = -1
 global generated_file_dir = ""
@@ -17,15 +20,26 @@ end
 
 function generation_dir()
     global generated_file_dir
+
     if !isdir(generated_file_dir)
         generated_file_dir = mktempdir()
     end
+
+    return generated_file_dir
 end
 
 rust_file_name(crate_name) = "$crate_name.rs"
 rust_lib_name(crate_name) = "lib$crate_name.$dlext"
 
 unique_crate_name(name="") = "$name$(compile_file_num())"
+
+const RUST_FILE_BOILERPLATE = """
+    extern crate libc;
+    use libc::*;
+    use std::ops::*;
+"""
+
+const RUST_FUNCTION_BOILERPLATE = "#[no_mangle]\npub extern """
 
 function compile_code(rust_code)
     crate_name = unique_crate_name()
@@ -38,6 +52,18 @@ function compile_code(rust_code)
 
     lib_path = compile_file(crate_name, dir, rust_path)
     return dlopen(lib_path)
+end
+
+function compile_function(func::Function, args::ANY)
+    func_name, code = AST.generate_rust(func, args)
+
+    io = IOBuffer()
+    println(io, RUST_FILE_BOILERPLATE)
+    println(io)
+    println(io, RUST_FUNCTION_BOILERPLATE, code)
+
+    lib = compile_code(String(io))
+    func = dlsym(lib, func_name)
 end
 
 function compile_file(crate_name, dir, rust_path)

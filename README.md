@@ -19,9 +19,9 @@ Take a look at `test/runtests.jl` for usage examples.
 
 Current:
 - Compile a Rust code string and return a `dlopen`d library
+- Translate fully-typed methods to Rust with a macro that calls `code_typed`
 
 Future:
-- Translate fully-typed methods to Rust with a macro that calls `code_typed`
 - Rust string support
 - Replace common Julia method patterns with their Rust equivalents
 - Parameters => Generics
