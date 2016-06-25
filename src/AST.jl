@@ -19,6 +19,16 @@ const RUST_TYPES = Dict{DataType, String}(
 "Correspondence between Julia functions and Rust functions"
 const RUST_FUNCTIONS = Dict{Symbol, String}(
     :+ => "add",
+    :div => "div",
+    :* => "mul",
+    :% => "rem",
+    :- => "sub",
+    :~ => "not",
+    :& => "bitand",
+    :| => "bitor",
+    :$ => "bitxor",
+    :<< => "shl",
+    :>> => "shr", # I believe this is the correct shift
 )
 
 
@@ -55,8 +65,18 @@ function emit(li::LambdaInfo, ex::Expr)::String
             print(io, ")")
             result = String(io)
         end
+
+        if isleaftype(ex.typ)
+            result_type = emit(li, ex.typ)
+            result = "($result) as $result_type"
+        end
     elseif ex.head === :return
-        result = "return $(emit(li, ex.args[1]))"
+        if isleaftype(ex.typ)
+            result_type = emit(li, ex.typ)
+            result = "return $(emit(li, ex.args[1])) as $result_type"
+        else
+            result = "return $(emit(li, ex.args[1]))"
+        end
     elseif ex.head === :line
         result = ""
     else

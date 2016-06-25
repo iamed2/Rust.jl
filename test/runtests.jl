@@ -40,4 +40,15 @@ end
         @test addition != C_NULL
         @test UInt32(UInt32(2) + UInt32(10)) === ccall(addition, UInt32, (UInt32, UInt32), 2, 10)
     end
+
+    @testset "Every function" begin
+        function everything(a::UInt32, b::UInt32)
+            (b >> a * b + div(b, a) * (a % b) - a | b) + (a & b + (~b $ a))
+        end
+
+        everything_rust = compile_function(everything, (UInt32, UInt32))
+
+        @test everything_rust != C_NULL
+        @test everything(UInt32(2), UInt32(10)) === ccall(everything_rust, UInt32, (UInt32, UInt32), 2, 10)
+    end
 end

@@ -25,3 +25,15 @@ Future:
 - Rust string support
 - Replace common Julia method patterns with their Rust equivalents
 - Parameters => Generics
+
+### Supported Types and Functions
+
+For a list of supported types call:
+```julia
+keys(Rust.AST.RUST_TYPES)
+```
+
+For a list of supported functions call:
+```julia
+keys(Rust.AST.RUST_FUNCTIONS)
+```
